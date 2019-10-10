@@ -1,10 +1,7 @@
 <?php
     $error ="";
-    $link = mysqli_connect('localhost','root','2182104667','social_network');
-    if (mysqli_connect_errno()) {
-        print_r(mysqli_connect_error());
-        exit();
-    }
+    include "databaseConnect.php";
+
 
 //    if($_POST['email'] && $_POST['password']&& $_POST['firstname']&& $_POST['lastname'] ) {
      $query = "select * from users where email = '" . mysqli_real_escape_string($link, $_POST['email']) . "' limit 1 ";

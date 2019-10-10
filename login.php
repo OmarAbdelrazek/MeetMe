@@ -1,11 +1,8 @@
 <?php
 session_start();
 $error = "";
-$link = mysqli_connect('localhost','root','2182104667','social_network');
-if (mysqli_connect_errno()) {
-    print_r(mysqli_connect_error());
-    exit();
-}
+include "databaseConnect.php";
+
 
  $query = "select * from users where email = '" . mysqli_real_escape_string($link, $_POST['email']) . "' limit 1 ";
 
@@ -14,7 +11,9 @@ if (mysqli_connect_errno()) {
  $row = mysqli_fetch_assoc($result);
 
  if ($row['password'] == md5(md5($row['user_id']).$_POST['password'])) {
-    
+    $query = "UPDATE `users` SET `status`= 1 WHERE user_id = '".$row['user_id']."' LIMIT 1";
+    mysqli_query($link,$query);
+    $_SESSION["status"] = 1;
     $_SESSION["userId"] = $row['user_id'];
     $_SESSION["email"] = $row['email'];
     $_SESSION["firstname"] = $row['first_name'];

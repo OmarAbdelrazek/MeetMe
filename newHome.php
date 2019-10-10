@@ -1,11 +1,8 @@
 <?php
 session_start();
 
-$link = mysqli_connect('localhost', 'root', '2182104667', 'social_network');
-if (mysqli_connect_errno()) {
-    print_r(mysqli_connect_error());
-    exit();
-}
+include "databaseConnect.php";
+
 
 ?>
 

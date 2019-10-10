@@ -1,11 +1,10 @@
 <?php
 session_start();
-
-$link = mysqli_connect('localhost', 'root', '2182104667', 'social_network');
-if (mysqli_connect_errno()) {
-  print_r(mysqli_connect_error());
-  exit();
+if (!isset($_SESSION['userId'])) {
+  header("Location: index.php");
 }
+
+include "databaseConnect.php";
 
 ?>
 
@@ -18,7 +17,7 @@ if (mysqli_connect_errno()) {
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <title>MeetMe</title>
+  <title>Home - Meet Me</title>
 
   <!-- GOOGLE FONTS -->
   <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500|Poppins:400,500,600,700|Roboto:400,500" rel="stylesheet" />
@@ -89,13 +88,14 @@ if (mysqli_connect_errno()) {
 
           <!-- sidebar menu -->
           <ul class="nav sidebar-inner" id="sidebar-menu">
+            <li class="has-sub active expand">
 
 
             <li>
               <a class="sidenav-item-link" href="home.php">
                 <i class="mdi mdi-home-account"></i>
 
-                <span class="nav-text">Home</span>
+                <span class="nav-text">Home</span> <b class="caret"></b>
 
               </a>
             </li>
@@ -104,10 +104,19 @@ if (mysqli_connect_errno()) {
                 <i class="mdi mdi-account-group-outline"></i>
                 <span class="nav-text">Discover</span>
 
-                <span class="badge badge-success">new</span>
 
               </a>
             </li>
+            <li>
+              <a class="sidenav-item-link" href="friendRequests.php">
+                <i class="mdi mdi-account-arrow-left"></i>
+                <span class="nav-text">Friends Management</span>
+
+
+              </a>
+            </li>
+            </li>
+
 
 
 
@@ -137,14 +146,18 @@ if (mysqli_connect_errno()) {
               <!-- User Account -->
               <li class="dropdown user-menu">
                 <button href="#" class="dropdown-toggle nav-link" data-toggle="dropdown">
-                  <?php
-                  if (empty($_SESSION['pic'])) {
-                    ?>
-                    <img src="assets/img/user/user.png" class="user-img" width="40px" height="40px" alt="User Image" />
-                  <?php } else {
-                    ?>
-                    <img src="<?php echo $_SESSION['pic']; ?>" class="user-img" width="40px" height="40px" alt="User Image" />
-                  <?php } ?>
+                <?php if ($_SESSION['pic']) {
+                        $pic = $_SESSION['pic'];
+                      } else {
+                        if ($_SESSION['gender'] == 0) {
+                          $pic = "assets/img/user/male.png";
+                        } else {
+                          $pic = "assets/img/user/female.png";
+                        }
+                      }
+                      ?>
+                  <img src="<?= $pic?>" class="user-img" width="40px" height="40px" alt="User Image" />
+                 
                   <span class="d-none d-lg-inline-block">
                     <?php
                     $query  = "SELECT users.first_name , users.last_name , users.email FROM users WHERE user_id = " . $_SESSION['userId'];
@@ -156,21 +169,38 @@ if (mysqli_connect_errno()) {
                     ?>
                   </span>
                 </button>
-                <ul class="dropdown-menu dropdown-menu-left">
+                <ul class="dropdown-menu dropdown-menu-right">
                   <!-- User image -->
                   <li class="dropdown-header">
-                    <?php
-                    if (empty($_SESSION['pic'])) {
+                  <?php if ($_SESSION['pic']) {
+                        $pic = $_SESSION['pic'];
+                      } else {
+                        if ($_SESSION['gender'] == 0) {
+                          $pic = "assets/img/user/male.png";
+                        } else {
+                          $pic = "assets/img/user/female.png";
+                        }
+                      }
                       ?>
-                      <img src="assets/img/user/user.png" class="img-circle" alt="User Image" />
-                    <?php } else {
-                      ?>
-                      <img src="<?php echo $_SESSION['pic']; ?>" class="img-circle" alt="User Image" />
-                    <?php } ?>
+                      <img src="<?= $pic?>" class="img-circle" alt="User Image" />
+
+                   
                     <div class="d-inline-block">
                       <?php echo $_SESSION['firstname'] . " " . $_SESSION['lastname'];    ?> <small class="pt-1" id="email"><?php echo $_SESSION['email']; ?></small>
                     </div>
                   </li>
+
+                  <li>
+                    <form action="myProfile.php" method="post" name="myform">
+                      <input type="hidden" name="profile_id" value="<?= $_SESSION['userId'] ?>">
+
+                      <a href="javascript: submitform()"">
+                                          
+                                            <i class=" mdi mdi-account-box"></i> Profile
+                      </a>
+                  </li>
+                  </form>
+
 
 
                   <li>
@@ -180,7 +210,7 @@ if (mysqli_connect_errno()) {
                   </li>
 
                   <li>
-                    <a href="accountSettings.php"> <i class="mdi mdi-settings"></i> Account Setting </a>
+                    <a href="accountSettings.php"> <i class="mdi mdi-settings"></i> Account Settings </a>
                   </li>
 
                   <li class="dropdown-footer">
@@ -201,39 +231,61 @@ if (mysqli_connect_errno()) {
           <div class="bg-white border rounded">
             <div class="row no-gutters">
               <div class="col-lg-4 col-xl-3">
+
                 <div class="profile-content-left pt-5 pb-3 px-3 px-xl-5">
                   <div class="card text-center widget-profile px-0 border-0">
                     <div class="card-img mx-auto rounded-circle ">
-                      <?php
-                      if (empty($_SESSION['pic'])) {
-                        ?>
-                        <img src="assets/img/user/user.png" alt="User Image" />
-                      <?php } else {
-                        ?>
-                        <img src="<?php echo $_SESSION['pic']; ?>" width="100px" height="100px" alt="User Image" />
-                      <?php } ?>
+                      
+
+                      <?php if ($_SESSION['pic']) {
+                        $pic = $_SESSION['pic'];
+                      } else {
+                        if ($_SESSION['gender'] == 0) {
+                          $pic = "assets/img/user/male.png";
+                        } else {
+                          $pic = "assets/img/user/female.png";
+                        }
+                      }
+                      ?>
+                      <img src="<?php echo $pic; ?>" width="100px" height="100px" alt="User Image" />
                     </div>
 
                     <div class="card-body">
-                      <h4 class="py-2 text-dark"> <?php echo $_SESSION['firstname'] . " " . $_SESSION['lastname']; ?>
-                      </h4>
+                    <?php
+                    if($_SESSION['status'] == 1){
+                    $status = "assets/img/user/online.jpg";
+                    } else{
+                      $status = "assets/img/user/offline.png";
+                    }
+                    ?>
+                    
+                      <h4 class="py-2 text-dark"><img class = "mb-1"src="<?php echo $status; ?>" width="10px" height="10px" alt="User Image" />
+                       <?php echo $_SESSION['firstname'] . " " . $_SESSION['lastname']; ?>
+                    
+                    </h4>
                       <p id="email"><?php echo $_SESSION['email']; ?></p>
                     </div>
                   </div>
                   <div class="d-flex justify-content-between ">
                     <?php
-                    $query  = 'SELECT COUNT(*) FROM `friends_request` WHERE `user_id` ='.$_SESSION['userId'].' AND `status` = 1';
-                    $result = mysqli_query($link,$query);
+                    $query  = 'SELECT COUNT(*) FROM `friend_reqs` WHERE `user_id` =' . $_SESSION['userId'] . ' OR `friend_id` =' . $_SESSION['userId'] . ' AND `status` = 1';
+                    $result = mysqli_query($link, $query);
                     $freinds = mysqli_fetch_array($result);
-                    
+
                     ?>
                     <div class="text-center pb-4">
                       <h6 class="text-dark pb-2"><?php echo $freinds[0]; ?></h6>
                       <p>Friends </p>
                     </div>
-                    
+                    <?php
+                    $query  = 'SELECT COUNT(*) FROM `friend_reqs` WHERE `friend_id` =' . $_SESSION['userId'] . ' AND `status` = 0';
+                    $result = mysqli_query($link, $query);
+                    $requests = mysqli_fetch_array($result);
+
+                    ?>
+
                     <div class="text-center pb-4">
-                      <h6 class="text-dark pb-2">0</h6>
+                      <h6 class="text-dark pb-2"><?php echo $requests[0]; ?></h6>
                       <p>Requests</p>
                     </div>
                   </div>
@@ -248,7 +300,7 @@ if (mysqli_connect_errno()) {
                 </div>
               </div>
 
-              
+
 
               <div class="col-lg-8 col-xl-9 col-xs-12">
                 <div class="profile-content-right py-5">
@@ -273,50 +325,48 @@ if (mysqli_connect_errno()) {
                         ?>
 
                         <div class="media mt-5 profile-timeline-media">
-                        
+
                           <div class="align-self-start iconbox-45 overflow-hidden mr-3">
-                          <?php
-                                // $query = "SELECT `pic` FROM `users` WHERE user_id=".$row['userId']." ";
-                                // $pic = mysqli_query($link,$query);
-                                // echo $pic;
-                                if($row['pic']){
-                                  $pic = $row['pic'];
-                                  ?>
+                            <?php
+                              // $query = "SELECT `pic` FROM `users` WHERE user_id=".$row['userId']." ";
+                              // $pic = mysqli_query($link,$query);
+                              // echo $pic;
+                              if ($row['pic']) {
+                                $pic = $row['pic'];
+                                ?>
 
 
-                            
-                               
-                                <?php }
-                                else{
-                                  if($row['gender'] == 0){
-                                    $pic = "assets/img/user/male.png";
-                                  }
-                                  else {
-                                    $pic = "assets/img/user/female.png";
-                                  }
+
+
+                            <?php } else {
+                                if ($row['gender'] == 0) {
+                                  $pic = "assets/img/user/male.png";
+                                } else {
+                                  $pic = "assets/img/user/female.png";
                                 }
-                                  ?>
-                            <img src =" <?php echo $pic;  ?>" width="40px" height="40px"  alt="Generic placeholder image">
+                              }
+                              ?>
+                            <img src=" <?php echo $pic;  ?>" width="40px" height="40px" alt="Generic placeholder image">
 
-                                  <?php
-                                
-                                  ?>
+                            <?php
+
+                              ?>
                           </div>
-                                
+
                           <div class="media-body">
                             <h6 class="mt-0 text-dark" id="full-name">
                               <?php
-                              echo $row['first_name'] . " " . $row["last_name"];
+                                echo $row['first_name'] . " " . $row["last_name"];
 
 
-                              ?>
+                                ?>
                             </h6>
-                            <span class="float-right"  id="date-time"><?= $row['post_time']; ?></span>
-                                <p id="post-content">
-                        <?php echo $row['post_data'];?>
-                      </p>
+                            <span class="float-right" id="date-time"><?= $row['post_time']; ?></span>
+                            <p id="post-content">
+                              <?php echo $row['post_data']; ?>
+                            </p>
 
-                          
+
                           </div>
                         </div>
 
@@ -330,8 +380,8 @@ if (mysqli_connect_errno()) {
                     </div>
 
 
-                    
-                    
+
+
 
                     <div class="tab-pane fade" id="post" role="tabpanel" aria-labelledby="post-tab">
                       <div class="card card-default">
@@ -348,18 +398,18 @@ if (mysqli_connect_errno()) {
                                 ?>
                                 <div class="alert alert-danger" role="alert">
                                   <?php
-                                  echo $_SESSION['postError'];
-                                  setcookie("postError", "", time() - (86400 * 30));
+                                    echo $_SESSION['postError'];
+                                    setcookie("postError", "", time() - (86400 * 30));
 
-                                  ?>
+                                    ?>
                                 </div>
                               <?php } ?>
 
-                              <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" name="postData"></textarea>
+                              <textarea class="form-control" id="exampleFormControlTextarea1" required rows="3" name="postData"></textarea>
                             </div>
 
                             <div class="form-footer pt-4 pt-5 mt-4 border-top">
-                              <button type="submit" class="btn btn-primary btn-default">Post</button>
+                              <button type="submit" class="btn btn-primary btn-default"  >Post</button>
 
                             </div>
                           </form>
@@ -395,6 +445,16 @@ if (mysqli_connect_errno()) {
     </div>
   </div>
 
+  <script type="text/javascript">
+    function submitform() {
+      document.myform.submit();
+    }
+  </script>
+<script>
+$(window).unload(function(){
+  alert("Goodbye!");
+});
+</script>
 
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDCn8TFXGg17HAUcNpkwtxxyT9Io9B_NcM" defer></script>
   <script src="assets/plugins/jquery/jquery.min.js"></script>

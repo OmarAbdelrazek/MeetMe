@@ -15,7 +15,7 @@ include "databaseConnect.php";
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Discover - Meet Me</title>
+    <title>Friends Requests - Meet Me</title>
 
     <!-- GOOGLE FONTS -->
     <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500|Poppins:400,500,600,700|Roboto:400,500" rel="stylesheet" />
@@ -99,7 +99,7 @@ include "databaseConnect.php";
                         <li>
                             <a class="sidenav-item-link" href="discover.php">
                                 <i class="mdi mdi-account-group-outline"></i>
-                                <span class="nav-text">Discover </span> <b class="caret"></b>
+                                <span class="nav-text">Discover </span>
 
 
                             </a>
@@ -107,7 +107,7 @@ include "databaseConnect.php";
                         <li>
                             <a class="sidenav-item-link" href="friendRequests.php">
                                 <i class="mdi mdi-account-arrow-left"></i>
-                                <span class="nav-text">Friends Management</span>
+                                <span class="nav-text">Friends Management</span> <b class="caret"></b>
 
 
                             </a>
@@ -141,7 +141,6 @@ include "databaseConnect.php";
                             <!-- User Account -->
                             <li class="dropdown user-menu">
                                 <button href="#" class="dropdown-toggle nav-link" data-toggle="dropdown">
-
                                     <?php if ($_SESSION['pic']) {
                                         $pic = $_SESSION['pic'];
                                     } else {
@@ -152,24 +151,19 @@ include "databaseConnect.php";
                                         }
                                     }
                                     ?>
-                                    <img src="<?php echo $pic; ?>" class="user-img" width="40px" height="40px" alt="User Image" />
-
-
+                                    <img src="<?php echo $pic ?>" class="user-img" width="40px" height="40px" alt="User Image" />
                                     <span class="d-none d-lg-inline-block">
-                                        <?php
-                                        $query  = "SELECT users.first_name , users.last_name , users.email FROM users WHERE user_id = " . $_SESSION['userId'];
-                                        $result = mysqli_query($link, $query);
+                    
+                    <?php echo $_SESSION['firstname'] . " " . $_SESSION['lastname']; ?> 
 
-                                        $row = mysqli_fetch_array($result);
-                                        echo $row['first_name'] . " " . $row['last_name'];
+                    
+                  </span>
 
-                                        ?>
-                                    </span>
+                                    
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-right">
                                     <!-- User image -->
                                     <li class="dropdown-header">
-
                                         <?php if ($_SESSION['pic']) {
                                             $pic = $_SESSION['pic'];
                                         } else {
@@ -180,9 +174,10 @@ include "databaseConnect.php";
                                             }
                                         }
                                         ?>
-                                        <img src="<?php echo $pic; ?>" class="img-circle" alt="User Image" />
+                                         <img src="<?php echo $pic ?>" class="img-circle" alt="User Image" />
 
 
+                                        
                                         <div class="d-inline-block">
                                             <?php echo $_SESSION['firstname'] . " " . $_SESSION['lastname'];    ?>
                                             <small class="pt-1" id="email"><?php echo $_SESSION['email']; ?></small>
@@ -206,7 +201,8 @@ include "databaseConnect.php";
                                     </li>
 
                                     <li>
-                                        <a href="friendRequests.php"> <i class="mdi mdi-settings"></i> Account Settings </a>
+                                        <a href="accountSettings.php"> <i class="mdi mdi-settings"></i> Account Settings
+                                        </a>
                                     </li>
 
                                     <li class="dropdown-footer">
@@ -227,135 +223,146 @@ include "databaseConnect.php";
                     <div class="bg-white border rounded">
                         <div class="card card-default">
                             <div class="card-header card-header-border-bottom">
-                                <h2>Discover people</h2>
+                                <h2>Friend Requstes</h2>
                             </div>
                             <div class="card-body">
                                 <div class="row">
 
                                     <?php
-                                    $query = "SELECT `users`.`user_id`AS `user_id1`,`users`.`email`,`users`.`first_name`,`users`.`last_name`,`users`.`pic`,`users`.`status`,`users`.`gender`,`friend_reqs`.`user_id` ,`friend_reqs`.`friend_id`,`friend_reqs`.`status` FROM `users` LEFT JOIN `friend_reqs` ON `users`.`user_id` = `friend_reqs`.`user_id` WHERE users.user_id IN (SELECT user_id FROM friend_reqs ) OR users.user_id NOT IN (SELECT friend_id FROM friend_reqs)";
+                                    $query = "SELECT `friend_reqs`.`friend_id`,`friend_reqs`.`user_id`,`friend_reqs`.`status`,`users`.`first_name`,`users`.`last_name`,`users`.`email`,`users`.`gender`,`users`.`pic` FROM `friend_reqs`,`users` WHERE `friend_reqs`.`user_id` = `users`.`user_id` AND (`friend_reqs`.`user_id` ='" . $_SESSION['userId'] . "'OR `friend_reqs`.`friend_id` ='" . $_SESSION['userId'] . "') ";
                                     $result = mysqli_query($link, $query);
-                                    $i = 0;
-                                    $j = 0;
+                                    while ($row = mysqli_fetch_array($result)) {
+                                        $query = "SELECT `first_name`,`last_name`,`pic`,`gender`,`user_id`,`email` FROM `users` WHERE `user_id` = '" . $row['friend_id'] . "'";
+                                        $result1 = mysqli_query($link, $query);
+                                        $row1 = mysqli_fetch_array($result1);
+                                        if ($row['user_id'] == $_SESSION['userId']) {
+                                            ?>
 
-
-                                    while ($user = mysqli_fetch_array($result)) {
-
-
-                                        if ($user['user_id'] == $_SESSION['userId']) {
-                                            $query1 = "SELECT  `user_id`,`email`, `first_name`, `last_name`, `gender`, `pic`,`status` FROM `users` WHERE `user_id` = '" . $user['friend_id'] . "' ";
-                                            $result1 = mysqli_query($link, $query1);
-                                            $row = mysqli_fetch_array($result1);
-                                            $case = "imTheUser";
-                                            // $checkId[$i] = $row['user_id'];
-                                            // $i++;
-                                            $checkUser[$j] = $user['friend_id'];
-                                            $j++;
-                                        } else if ($user['friend_id'] == $_SESSION['userId']) {
-                                            $query2 = "SELECT  `user_id`,`email`, `first_name`, `last_name`, `gender`, `pic`,`status` FROM `users` WHERE `user_id` = '" . $user[0] . "' ";
-                                            $result2 = mysqli_query($link, $query2);
-                                            $row = mysqli_fetch_array($result2);
-                                            $case = "imTheFriend";
-                                            // $checkId[$i] = $row['user_id'];
-                                            // $i++;
-                                            $checkUser[$j] = $user['user_id'];
-                                            $j++;
-                                        } else {
-                                            $query3 = "SELECT  `user_id`,`email`, `first_name`, `last_name`, `gender`,`status`, `pic` FROM `users` WHERE `user_id` = '" . $user[0] . "' ";
-                                            $result3 = mysqli_query($link, $query3);
-                                            $row = mysqli_fetch_array($result3);
-                                            $case = "notFriend";
-                                            $checkUser[$j] = $user['user_id'];
-                                            $j++;
-                                        }
-
-
-                                        if ($row['pic']) {
-                                            $pic = $row['pic'];
-                                        } else {
-                                            if ($row['gender'] == 0) {
-                                                $pic = "assets/img/user/male.png";
-                                            } else {
-                                                $pic = "assets/img/user/female.png";
-                                            }
-                                        }
-
-
-                                        ?>
-
-
-                                        <div class="col-md-6 col-xl-3">
-                                            <div class="card mb-4">
-
-
-
-                                                <div class="card-body">
-
-                                                    <img class="card-img-top mb-4 rounded" alt="show" src="<?php echo $pic ?>">
-
-                                                    <h5 class="card-title text-primary " style="font-size: 13pt;">
-                                                        <?php
-                                                            if ($row['status'] == 1) {
-                                                                $status = "assets/img/user/online.jpg";
-                                                            } else {
-                                                                $status = "assets/img/user/offline.png";
-                                                            }
-                                                            ?>
-                                                        <img class="mb-1" src="<?php echo $status; ?>" width="10px" height="10px" alt="User Image" />
-                                                        <?php echo $row['first_name'] . " " . $row['last_name'];  ?></h5>
-                                                    <p class="card-text pb-3 nowrap"></p> <?php echo $row['email']; ?> </p>
-                                                    <p class="card-text pb-3"> <?php
-                                                                                    if ($row['gender'] == 0) {
-                                                                                        echo "\nMale";
-                                                                                    } else {
-                                                                                        echo "\nFemale";
-                                                                                    }
-                                                                                    ?> </p>
-                                                    <form action="addFriend.php" method="post">
-                                                        <?php
-                                                            if ($case == "imTheFriend" && $user['status'] == 0) {
-
+                                            <div class="col-md-6 col-xl-3">
+                                                <div class="card mb-4">
+                                                    <?php
+                                                            if ($row1['pic']) {
+                                                                $pic = $row1['pic'];
                                                                 ?>
-                                                            <button type="submit" disabled name="friendId" value="<?php echo $row['user_id']; ?>" class="btn btn-warning"><i class="mdi mdi-account-clock"></i><?= $row['first_name'] ?> sent you a friend request</button>
 
-                                                        <?php
-                                                            } else if ($case == "imTheFriend" && $user['status'] == 1) {
-                                                                ?>
-                                                            <button type="submit" disabled name="friendId" value="<?php echo $row['user_id']; ?>" class="btn btn-danger"><i class="mdi mdi-account-check"></i> Friend</button>
-                                                        <?php
-                                                            } else if ($case == "imTheUser" && $user['status'] == 0) {
-                                                                ?>
-                                                            <button type="submit" disabled name="friendId" value="<?php echo $row['user_id']; ?>" class="btn btn-warning"><i class="mdi mdi-account-arrow-left"></i> Sent</button>
-                                                        <?php
-                                                            } else if ($case == "imTheUser" && $user['status'] == 1) {
-                                                                ?>
-                                                            <button type="submit" disabled name="friendId" value="<?php echo $row['user_id']; ?>" class="btn btn-danger"><i class="mdi mdi-account-check"></i> Friend</button>
-                                                        <?php
-                                                            } else if ($case == "notFriend") {
-                                                                ?>
-                                                            <button type="submit" name="friendId" value="<?php echo $row['0']; ?>" class="btn btn-primary"><i class="mdi mdi-account-plus"></i> Add</button>
-                                                        <?php
-                                                            }
-                                                            ?>
-                                                    </form>
-                                                    <form action="visitProfile.php" method="post">
-                                                        <input type="hidden" name="case" value="<?= $case ?>">
-                                                        <input type="hidden" name="user" value="<?= $user['status'] ?>">
+                                                        <?php } else {
+                                                                    if ($row1['gender'] == 0) {
+                                                                        $pic = "assets/img/user/male.png";
 
-                                                        <button type="submit" class="btn btn-info mt-2" name="profile_id" value="<?= $row['user_id'] ?>">Visit</button>
-                                                    </form>
+                                                                        ?>
 
+                                                    <?php } else {
+                                                                    $pic = "assets/img/user/female.png";
+                                                                }
+                                                            }  ?>
+
+
+                                                    <div class="card-body">
+                                                        <img class="card-img-top mb-4 rounded" src="<?php echo $pic ?>">
+                                                        <h5 class="card-title text-primary " style="font-size: 13pt;">
+                                                            <?php echo $row1['first_name'] . " " . $row1['last_name'];  ?></h5>
+                                                        <p class="card-text pb-3 nowrap"></p> <?php echo $row1['email'];
+
+                                                                                                        ?> </p>
+                                                        <p class="card-text pb-3"> <?php
+                                                                                            if ($row1['gender'] == 0) {
+                                                                                                echo "\nMale";
+                                                                                            } else {
+                                                                                                echo "\nFemale";
+                                                                                            }
+                                                                                            ?> </p>
+                                                        <form action="requestManagement.php" method="post">
+                                                            <?php if ($row['status'] == 1) {
+
+                                                                        ?>
+                                                                <button type="button" value="<?php echo $row1['friend_id'] ?>" disabled class="btn btn-success"><i class="mdi mdi-account-check"></i>
+                                                                    Friend</button>
+                                                            <?php  } else if ($row['status'] == 0) {
+                                                                        ?>
+
+                                                                <button type="button" value="<?php echo $row1['friend_id'] ?>" disabled class="btn btn-warning"><i class="mdi mdi-account-clock"></i>
+                                                                    Sent</button>
+                                                            <?php } ?>
+
+
+
+
+
+                                                        </form>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
+                                        <?php
+                                            } else {
+                                                ?>
+                                            <div class="col-md-6 col-xl-3">
+                                                <div class="card mb-4">
+                                                    <?php
+                                                            if ($row['pic']) {
+                                                                $pic = $row['pic'];
+                                                                ?>
 
+                                                        <?php } else {
+                                                                    if ($row['gender'] == 0) {
+                                                                        $pic = "assets/img/user/male.png";
+
+                                                                        ?>
+
+                                                    <?php } else {
+                                                                    $pic = "assets/img/user/female.png";
+                                                                }
+                                                            }  ?>
+
+
+                                                    <div class="card-body">
+                                                        <img class="card-img-top mb-4 rounded" src="<?php echo $pic ?>">
+                                                        <h5 class="card-title text-primary " style="font-size: 13pt;">
+                                                            <?php echo $row['first_name'] . " " . $row['last_name'];  ?></h5>
+                                                        <p class="card-text pb-3 nowrap"></p> <?php echo $row['email'];
+
+                                                                                                        ?> </p>
+                                                        <p class="card-text pb-3"> <?php
+                                                                                            if ($row['gender'] == 0) {
+                                                                                                echo "\nMale";
+                                                                                            } else {
+                                                                                                echo "\nFemale";
+                                                                                            }
+                                                                                            ?> </p>
+                                                        <form action="requestManagement.php" method="post">
+                                                            <?php if ($row['status'] == 1) {
+
+                                                                        ?>
+                                                                <button type="button" value="<?php echo $row['friend_id'] ?>" disabled class="btn btn-success"><i class="mdi mdi-account-multiple-check"></i>
+                                                                    Friend</button>
+                                                            <?php  } else if ($row['status'] == 0) {
+                                                                        ?>
+
+                                                                <div class="dropdown d-inline-block mb-1">
+                                                                    <button class="btn btn-danger dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-display="static"> <i class="mdi mdi-account-clock"></i>
+                                                                        --
+                                                                    </button>
+                                                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                                                        <input type="hidden" name="friend_id" value="<?php echo $row["friend_id"] ?>">
+                                                                        <button type="sumbit" class="dropdown-item" name="action" value="accept">Accept</button>
+                                                                        <button class="dropdown-item" name="action" value="reject">Reject</button>
+                                                                    </div>
+
+                                                                </div>
+                                                            <?php } ?>
+
+
+
+
+
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
                                     <?php
 
-
+                                        }
                                     }
-
                                     ?>
-
 
 
                                 </div>
@@ -385,12 +392,12 @@ include "databaseConnect.php";
 
         </div>
     </div>
-
     <script type="text/javascript">
         function submitform() {
             document.myform.submit();
         }
     </script>
+
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDCn8TFXGg17HAUcNpkwtxxyT9Io9B_NcM" defer></script>
     <script src="assets/plugins/jquery/jquery.min.js"></script>
     <script src="assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
